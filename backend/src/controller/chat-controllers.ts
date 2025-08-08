@@ -5,11 +5,7 @@ dotenv.config()
 import { GoogleGenAI } from "@google/genai";
 import tools from "../utils/tools.js";
 
-<<<<<<< HEAD
 export const generateChatCompletion = async (req: Request,
-=======
-export const  generateChatCompletion=async( req: Request,
->>>>>>> b98f2925f1da6498b91e3ab7a5c65138b306f54a
   res: Response,
   next: NextFunction): Promise<Response> => {
   try {
