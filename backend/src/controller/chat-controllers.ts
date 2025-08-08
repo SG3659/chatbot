@@ -5,7 +5,11 @@ dotenv.config()
 import { GoogleGenAI } from "@google/genai";
 import tools from "../utils/tools.js";
 
+<<<<<<< HEAD
 export const generateChatCompletion = async (req: Request,
+=======
+export const  generateChatCompletion=async( req: Request,
+>>>>>>> b98f2925f1da6498b91e3ab7a5c65138b306f54a
   res: Response,
   next: NextFunction): Promise<Response> => {
   try {
@@ -76,6 +80,30 @@ export const generateChatCompletion = async (req: Request,
       }));
     // Initialize GenAI client
     const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_KEY });
+<<<<<<< HEAD
+=======
+
+    // Define tool declarations for function calling
+    const toolDeclarations = [
+      {
+        name: "getDoctorInfo",
+        description:
+          "Retrieve information about our surgeons. Pass doctorId as 'andre', 'catherine', or 'both' to list both.",
+        parameters: {
+          type: "object",
+          properties: {
+            doctorId: {
+              type: "string",
+              description:
+                "ID of the doctor to retrieve. Use 'andre', 'catherine', or 'both' to get both.",
+              enum: ["andre", "catherine", "both"],
+            },
+          },
+        },
+      },
+    ];
+
+>>>>>>> b98f2925f1da6498b91e3ab7a5c65138b306f54a
     // Send request with history + new message + tools
     const response = await ai.models.generateContent({
       model: "gemini-2.0-flash",
