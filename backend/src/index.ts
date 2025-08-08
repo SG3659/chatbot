@@ -11,11 +11,6 @@ const app = express();
 // Middlewares
 app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 app.use(express.json());
-
-app.get("/", (req: Request, res: Response) => {
-  res.send("hello ai");
-});
-
 app.use("/api/v1", appRouter);
 
 app.listen(PORT, () => {
