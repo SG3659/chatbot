@@ -78,11 +78,7 @@ export const tools = {
       };
     }
 
-<<<<<<< HEAD
     const doctor = doctors[doctorId];
-=======
-    const doctor = doctors[doctorId as keyof typeof doctors];
->>>>>>> b98f2925f1da6498b91e3ab7a5c65138b306f54a
     if (!doctor) {
       return { message: "Doctor not found." };
     }
