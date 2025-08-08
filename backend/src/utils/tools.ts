@@ -16,6 +16,32 @@ const doctors = {
     bio: "Dr. Catherine Loflin is a board-certified plastic surgeon...",
   },
 };
+
+export type DoctorId = keyof typeof doctors | "both";
+
+export const tools = {
+  getDoctorInfo: async ({ doctorId }: { doctorId?: DoctorId }) => {
+    if (!doctorId || doctorId === "both") {
+      return {
+        doctors: Object.values(doctors),
+        message: "Here is information about our doctors:",
+      };
+    }
+
+    const doctor = doctors[doctorId as keyof typeof doctors];
+    if (!doctor) {
+      return { message: "Doctor not found." };
+    }
+
+    return {
+      doctor,
+      message: `Details for Dr. ${doctor.name}:`,
+    };
+  },
+};
+
+export default tools;
+
 const generateTimeSlots = () => {
   const slots: string[] = [];
   for (let hour = 9; hour < 18; hour++) {
@@ -39,7 +65,7 @@ const generateTimeSlots = () => {
 //           : `No available slots for ${doctor.name} on ${date}`,
 //     };
 //   },
-
+//
 //   bookAppointment: async ({
 //     patientName,
 //     patientAge,
@@ -82,7 +108,7 @@ const generateTimeSlots = () => {
 //       message: `Appointment booked successfully for ${patientName} with ${doctor.name} on ${date} at ${time}`,
 //     };
 //   },
-
+//
 //   cancelAppointment: async ({ appointmentId }: { appointmentId: string }) => {
 //     const appointment = await Appointment.findByIdAndDelete(appointmentId);
 //     if (!appointment) {
@@ -93,7 +119,7 @@ const generateTimeSlots = () => {
 //       message: `Appointment for ${appointment.patientName} with ${appointment.doctorName} on ${appointment.date} at ${appointment.time} has been cancelled.`,
 //     };
 //   },
-
+//
 //   getAppointments: async ({ patientPhone }: { patientPhone: string }) => {
 //     const patientAppointments = await Appointment.find({ patientPhone });
 //     if (patientAppointments.length === 0) {
@@ -101,7 +127,7 @@ const generateTimeSlots = () => {
 //     }
 //     return { appointments: patientAppointments, message: `Found ${patientAppointments.length} appointments.` };
 //   },
-
+//
 //   getDoctorInfo: async ({ doctorId }: { doctorId?: string }) => {
 //     if (!doctorId || doctorId === "both") {
 //       return { doctors: Object.values(doctors), message: "Here is information about our doctors:" };
