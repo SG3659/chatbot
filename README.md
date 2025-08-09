@@ -3,7 +3,7 @@
   Users should be able to come in and ask questions regarding the treatments that the clinic offers, ask for
   information regarding the doctors, or ask about any pre-op and post-op queries which they might have.  
 ## Clone Project:
-    -> 
+    -> git clone https://github.com/SG3659/chatbot.git
 
 ## FrontEnd SetUp:
     -> .env: NEXT_PUBLIC_API_URL
