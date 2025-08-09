@@ -186,7 +186,7 @@ export const tools = {
 
     return {
       doctor,
-      message: `Details for Dr. ${doctor.name}:`,
+      message: `Dr. ${doctor.name}:`,
     }
   },
   getPrePostOpGuidance: async ({ procedureId }: { procedureId?: ProcedureTipsID }) => {

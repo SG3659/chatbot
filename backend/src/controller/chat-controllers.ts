@@ -128,7 +128,12 @@ export const generateChatCompletion = async (req: Request,
         const doctorId = fc.args?.doctorId as string | undefined;
         const result = await (tools as any).getDoctorInfo({ doctorId });
         // Format a concise, helpful reply from tool result 
-        if (result?.doctor) {
+          if (result?.doctors && Array.isArray(result.doctors)) {
+          const list = result.doctors
+            .map((d: any) => `- ${d.name} — Specialties: ${d.specialties?.join(", ")}`)
+            .join("\n");
+          aiReply = `${result.message}\n${list}`;
+        } else if (result?.doctor) {
           const d = result.doctor;
           const specs = Array.isArray(d?.specialties) ? d.specialties.join(", ") : "";
           aiReply = `${result.message}\nNAme: ${d.name}\nSpecialties: ${specs}\nBio: ${d.bio}`;
@@ -140,6 +145,7 @@ export const generateChatCompletion = async (req: Request,
         const result = await (tools as any).getPrePostOpGuidance({ procedureId });
 
         // Format a concise, helpful reply from tool result
+        
         if (result?.procedureTips && Array.isArray(result.procedureTips)) {
           const list = result.procedureTips
             .map((d: any) => `- ${d.name} `)
