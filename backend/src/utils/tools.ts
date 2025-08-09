@@ -129,32 +129,38 @@ const procedureTips = {
 
 const treatments = {
   rhinoplasty: {
-    tratment: "Rhinoplasty",
-    summaery: "Rhinoplasty is a surgical procedure that reshapes or repairs the nose to improve its appearance or function.",
+    id: "rhinoplasty",
+    treatment: "Rhinoplasty",
+    summary: "Rhinoplasty is a surgical procedure that reshapes or repairs the nose to improve its appearance or function.",
     startingPrice: "7500",
     priceRange: [7500, 1200]
   },
   facelift: {
-    tratment: "Facelift",
-    summaery: "A facelift is a cosmetic surgery that tightens and lifts facial skin and tissues to reduce visible signs of aging.",
+    id: "facelift",
+
+    treatment: "Facelift",
+    summary: "A facelift is a cosmetic surgery that tightens and lifts facial skin and tissues to reduce visible signs of aging.",
     startingPrice: "7500",
     priceRange: [7500, 1200]
   },
   lipfillers: {
-    tratment: "Lip Fillers",
-    summaery: "Lip fillers are injectable treatments that add volume, shape, and definition to the lips for a fuller appearance.",
+    id: "lipfillers",
+    treatment: "Lip Fillers",
+    summary: "Lip fillers are injectable treatments that add volume, shape, and definition to the lips for a fuller appearance.",
     startingPrice: "7500",
     priceRange: [7500, 1200]
   },
   upperarmlift: {
-    tratment: "Upper Arm Lift",
-    summaery: "An upper arm lift is a surgical procedure that removes excess skin and fat from the upper arms to create a more toned and contoured appearance.",
+    id: "upperarmlift",
+    treatment: "Upper Arm Lift",
+    summary: "An upper arm lift is a surgical procedure that removes excess skin and fat from the upper arms to create a more toned and contoured appearance.",
     startingPrice: "7500",
     priceRange: [7500, 1200]
   },
   tummytuck: {
-    tratment: "Tummy Tuck",
-    summaery: "A tummy tuck is a surgical procedure that removes excess skin and fat from the abdomen and tightens the abdominal muscles for a flatter, firmer midsection.",
+    id: "tummytuck",
+    treatment: "Tummy Tuck",
+    summary: "A tummy tuck is a surgical procedure that removes excess skin and fat from the abdomen and tightens the abdominal muscles for a flatter, firmer midsection.",
     startingPrice: "7500",
     priceRange: [7500, 1200]
   },
@@ -162,6 +168,8 @@ const treatments = {
 
 export type DoctorId = keyof typeof doctors | "both";
 export type ProcedureTipsID = keyof typeof procedureTips | "all"
+export type TreatmentID = keyof typeof procedureTips | "all"
+
 export const tools = {
   getDoctorInfo: async ({ doctorId }: { doctorId?: DoctorId }) => {
     if (!doctorId || doctorId === "both") {
@@ -184,41 +192,59 @@ export const tools = {
   getPrePostOpGuidance: async ({ procedureId }: { procedureId?: ProcedureTipsID }) => {
     if (!procedureId || procedureId === "all") {
       return {
-        procedureTips: Object.values(procedureTips),
-        message: "Here is information about Pre or Post operation guidance:",
+        procedureTips: Object.values(procedureTips).map(({ id, ...rest }) => rest),
+        message: "Here is list about pre pr post operation guidance  provided by clinic:",
       };
     }
 
     const procedure = procedureTips[procedureId]
     if (!procedure) {
-      return { message: " Operation pre or post not found" }
+      return { message: " Sorry, we could not find any pre- or post-operation guidance for the specified procedure." }
     }
     return {
       procedure,
       message: "Pre Or Post Operation Guidance"
     }
   },
-  getTreatmentClinicOffer: async ({ treatment }: { treatment?: string }) => {
-    const normalized = treatment?.trim()?.toLowerCase() ?? "";
+  // getTreatmentClinicOffer: async ({ treatment }: { treatment?: string }) => {
+  //   const normalized = treatment?.trim()?.toLowerCase() ?? "";
 
-    if (!normalized || normalized === "all") {
+  //   if (!normalized || normalized === "all") {
+  //     return {
+  //       offers: Object.values(treatments),
+  //       message: "Here are our clinic offers for popular treatments:",
+  //     };
+  //   }
+
+  //   const offer = treatments[normalized];
+  //   if (!offer) {
+  //     return {
+  //       message: `We currently do not have a published offer for "${treatment ?? ""}".`
+  //     };
+  //   }
+
+  //   return {
+  //     offer,
+  //     message: `Clinic offer for ${offer.treatment}:`,
+  //   };
+  // }
+  getTreatmentClinicOffer: async ({ treatmentId }: { treatmentId?: TreatmentID }) => {
+    if (!treatmentId || treatmentId === "all") {
       return {
-        offers: Object.values(treatments),
-        message: "Here are our clinic offers for popular treatments:",
+        treatments: Object.values(treatments).map(({ id, ...rest }) => rest),
+        message: "Here is information about Treatment offer by this clinic:",
       };
     }
+    const treatment = treatments[treatmentId];
+    if (!treatment) {
+      return { message: "We currently do not have a published offer" }
 
-    const offer = treatments[normalized];
-    if (!offer) {
-      return {
-        message: `We currently do not have a published offer for "${treatment ?? ""}".`
-      };
     }
-
     return {
-      offer,
-      message: `Clinic offer for ${offer.treatment}:`,
-    };
+      treatment,
+      message: "Treatment offer by this Clinic"
+    }
+
   }
 };
 

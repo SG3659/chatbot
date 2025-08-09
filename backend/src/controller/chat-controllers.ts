@@ -57,9 +57,10 @@ export const generateChatCompletion = async (req: Request,
         parameters: {
           type: "object",
           properties: {
-            procedure: {
+            treatmentId: {
               type: "string",
-              description: "Optional treatment name or 'all' to list all offers."
+              description: "Optional treatment name or 'all' to list all offers.",
+              enum: ["rhinoplasty", "facelift", "tummytuck", "lipfillers", "all"]
             }
           }
         }
@@ -126,17 +127,11 @@ export const generateChatCompletion = async (req: Request,
       if (fc && fc.name === "getDoctorInfo") {
         const doctorId = fc.args?.doctorId as string | undefined;
         const result = await (tools as any).getDoctorInfo({ doctorId });
-
-        // Format a concise, helpful reply from tool result
-        if (result?.doctors && Array.isArray(result.doctors)) {
-          const list = result.doctors
-            .map((d: any) => `- ${d.name} — Specialties: ${d.specialties?.join(", ")}`)
-            .join("\n");
-          aiReply = `${result.message}\n${list}`;
-        } else if (result?.doctor) {
+        // Format a concise, helpful reply from tool result 
+        if (result?.doctor) {
           const d = result.doctor;
           const specs = Array.isArray(d?.specialties) ? d.specialties.join(", ") : "";
-          aiReply = `${result.message}\nName: ${d.name}\nSpecialties: ${specs}\nBio: ${d.bio}`;
+          aiReply = `${result.message}\nNAme: ${d.name}\nSpecialties: ${specs}\nBio: ${d.bio}`;
         } else if (result?.message) {
           aiReply = result.message;
         }
@@ -147,7 +142,7 @@ export const generateChatCompletion = async (req: Request,
         // Format a concise, helpful reply from tool result
         if (result?.procedureTips && Array.isArray(result.procedureTips)) {
           const list = result.procedureTips
-            .map((d: any) => `- ${d.name} — Pre Guideance: ${d.pre?.join(", ")}- Post Guideance: ${d.post?.join(",")}`)
+            .map((d: any) => `- ${d.name} `)
             .join("\n");
           aiReply = `${result.message}\n${list}`;
         } else if (result?.procedure) {
@@ -163,15 +158,15 @@ export const generateChatCompletion = async (req: Request,
       else if (fc && fc.name === "getTreatmentClinicOffer") {
         const treatment = fc.args?.treatment as string | undefined;
         const result = await (tools as any).getTreatmentClinicOffer({ treatment });
-        if (result?.offers && Array.isArray(result.offers)) {
-          const list = result.offers
-            .map((o: any) => `- ${o.treatment} — from $${o.startingPrice}`)
-            .join("\n");
+        if (result?.treatments && Array.isArray(result.treatments)) {
+          const list = result.treatments
+            .map((o: any) => `${o.treatment} — Price: ${o.startingPrice}`)
+            .join(",");
           aiReply = `${result.message}\n${list}`;
-        } else if (result?.offer) {
-          const o = result.offer;
-          const range = Array.isArray(o.priceRange) ? `$${o.priceRange[0]}–$${o.priceRange[1]}` : "";
-          aiReply = `${result.message}\nSummary: ${o.summary}\nStarting at: $${o.startingPrice}${range ? ` (typical ${range})` : ""}`;
+        } else if (result?.treatment) {
+          const o = result.treatment;
+          const range = Array.isArray(o.priceRange) ? `${o.priceRange[0]}–${o.priceRange[1]}` : "";
+          aiReply = `${result.message}\nSummary: ${o.summary}\nStarting at: ${o.startingPrice}${range ? ` (typical ${range})` : ""}`;
         } else if (result?.message) {
           aiReply = result.message;
         }
