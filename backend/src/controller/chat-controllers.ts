@@ -41,10 +41,12 @@ export const generateChatCompletion = async (req: Request,
         parameters: {
           type: "object",
           properties: {
-            procedure: {
+            procedureId: {
               type: "string",
-              description: "Provide the pre or post OP of surgery name Use Rhinoplasty Facelift Lip Fillers"
+              description: "Provide the pre or post OP of surgery name Use Rhinoplasty Facelift Lip Fillers",
+              enum: ["rhinoplasty", "facelift", "tummytuck", "lipfillers", "all"],
             }
+
           }
         }
 
@@ -115,6 +117,7 @@ export const generateChatCompletion = async (req: Request,
       return calls;
     };
     const functionCalls = extractFunctionCalls(response);
+    // console.log(functionCalls)
     let aiReply: string | undefined;
     // tools calling in function
     if (functionCalls.length > 0) {
@@ -138,14 +141,26 @@ export const generateChatCompletion = async (req: Request,
           aiReply = result.message;
         }
       } else if (fc && fc.name === "getPrePostOpGuidance") {
-        const procedure = fc.args?.procedure as string | undefined;
-        const result = await (tools as any).getPrePostOpGuidance({ procedure });
-        const preList = (result?.preOp ?? []).map((i: string) => `• ${i}`).join("\n");
-        const postList = (result?.postOp ?? []).map((i: string) => `• ${i}`).join("\n");
-        const header = result?.message ?? "Pre-op and post-op guidance:";
-        const disclaimer = result?.disclaimer ? `\n\nNote: ${result.disclaimer}` : "";
-        aiReply = `${header}\n\nPre-op:\n${preList}\n\nPost-op:\n${postList}${disclaimer}`;
-      } else if (fc && fc.name === "getTreatmentClinicOffer") {
+        const procedureId = fc.args?.procedureId as string | undefined;
+        const result = await (tools as any).getPrePostOpGuidance({ procedureId });
+
+        // Format a concise, helpful reply from tool result
+        if (result?.procedureTips && Array.isArray(result.procedureTips)) {
+          const list = result.procedureTips
+            .map((d: any) => `- ${d.name} — Pre Guideance: ${d.pre?.join(", ")}- Post Guideance: ${d.post?.join(",")}`)
+            .join("\n");
+          aiReply = `${result.message}\n${list}`;
+        } else if (result?.procedure) {
+          const d = result.procedure;
+          const pre = Array.isArray(d?.pre) ? d.pre.join(", ") : "";
+          const post = Array.isArray(d?.post) ? d.post.join(", ") : "";
+
+          aiReply = `${result.message}\nTreatment Name: ${d.name}\nPre Operation Guideance: ${pre}\nPost Operation Guideance: ${post}`;
+        } else if (result?.message) {
+          aiReply = result.message;
+        }
+      }
+      else if (fc && fc.name === "getTreatmentClinicOffer") {
         const treatment = fc.args?.treatment as string | undefined;
         const result = await (tools as any).getTreatmentClinicOffer({ treatment });
         if (result?.offers && Array.isArray(result.offers)) {
