@@ -136,7 +136,7 @@ const treatments = {
     priceRange: [7500, 1200]
   },
   facelift: {
-    id: "facelift",
+    id: "face lift",
 
     treatment: "Facelift",
     summary: "A facelift is a cosmetic surgery that tightens and lifts facial skin and tissues to reduce visible signs of aging.",
@@ -144,21 +144,21 @@ const treatments = {
     priceRange: [7500, 1200]
   },
   lipfillers: {
-    id: "lipfillers",
+    id: "lip fillers",
     treatment: "Lip Fillers",
     summary: "Lip fillers are injectable treatments that add volume, shape, and definition to the lips for a fuller appearance.",
     startingPrice: "7500",
     priceRange: [7500, 1200]
   },
   upperarmlift: {
-    id: "upperarmlift",
+    id: "upper arm lift",
     treatment: "Upper Arm Lift",
     summary: "An upper arm lift is a surgical procedure that removes excess skin and fat from the upper arms to create a more toned and contoured appearance.",
     startingPrice: "7500",
     priceRange: [7500, 1200]
   },
   tummytuck: {
-    id: "tummytuck",
+    id: "tummy tuck",
     treatment: "Tummy Tuck",
     summary: "A tummy tuck is a surgical procedure that removes excess skin and fat from the abdomen and tightens the abdominal muscles for a flatter, firmer midsection.",
     startingPrice: "7500",
