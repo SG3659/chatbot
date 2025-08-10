@@ -1,4 +1,4 @@
-
+import Appointment from "../model/appointment-model.js";
 const doctors = {
   andre: {
     id: "andre",
@@ -245,7 +245,38 @@ export const tools = {
       message: "Treatment offer by this Clinic"
     }
 
+  },
+  scheduleAppointment: async ({ patientName, doctorName, date, time, treatment }: {
+    patientName?: string;
+    doctorName?: string;
+    date?: string;
+    time?: string;
+    treatment?: string;
+  }) => {
+    try {
+      if (!patientName || !doctorName || !date || !time || !treatment) {
+        return {
+          message: "Missing required details to schedule the appointment."
+        }
+      }
+
+      const newAppointment = await Appointment.create({
+        patientName, doctorName, date, time, treatment
+      })
+      newAppointment.save()
+      return {
+        newAppointment,
+        message: `Appointment scheduled with Dr. ${doctorName} on ${date} at ${time} for ${treatment}.`
+
+      }
+    } catch (error) {
+      console.error("Error saving appointment:", error);
+      return {
+        message: "Failed to schedule appointment. Please try again later."
+      };
+    }
   }
+
 };
 
 export default tools;

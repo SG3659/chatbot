@@ -60,11 +60,25 @@ export const generateChatCompletion = async (req: Request,
             treatmentId: {
               type: "string",
               description: "Optional treatment name or 'all' to list all offers.",
-              enum: ["rhinoplasty", "facelift", "tummytuck", "lipfillers", "all"]
+              enum: ["rhinoplasty", "facelift", "tummytuck", "lipfillers", "upperarmlift", "all"]
             }
           }
         }
 
+      }, {
+        name: "scheduleAppointment",
+        description: "Schedules an appointment for a patient with a doctor.",
+        parameters: {
+          type: "object",
+          properties: {
+            patientName: { type: "string", description: "Name of the patient" },
+            doctorName: { type: "string", description: "Name of the doctor" },
+            date: { type: "string", description: "Date of appointment in YYYY-MM-DD format" },
+            time: { type: "string", description: "Time of appointment in HH:mm format" },
+            treatment: { type: "string", description: "Treatment or procedure to be performed" }
+          },
+          required: ["patientName", "doctorName", "date", "time", "treatment"]
+        }
       }
     ];
     // Get previous chats from DB
@@ -128,7 +142,7 @@ export const generateChatCompletion = async (req: Request,
         const doctorId = fc.args?.doctorId as string | undefined;
         const result = await (tools as any).getDoctorInfo({ doctorId });
         // Format a concise, helpful reply from tool result 
-          if (result?.doctors && Array.isArray(result.doctors)) {
+        if (result?.doctors && Array.isArray(result.doctors)) {
           const list = result.doctors
             .map((d: any) => `- ${d.name} — Specialties: ${d.specialties?.join(", ")}`)
             .join("\n");
@@ -145,7 +159,7 @@ export const generateChatCompletion = async (req: Request,
         const result = await (tools as any).getPrePostOpGuidance({ procedureId });
 
         // Format a concise, helpful reply from tool result
-        
+
         if (result?.procedureTips && Array.isArray(result.procedureTips)) {
           const list = result.procedureTips
             .map((d: any) => `- ${d.name} `)
@@ -166,7 +180,7 @@ export const generateChatCompletion = async (req: Request,
         const result = await (tools as any).getTreatmentClinicOffer({ treatment });
         if (result?.treatments && Array.isArray(result.treatments)) {
           const list = result.treatments
-            .map((o: any) => `${o.treatment} — Price: ${o.startingPrice}`)
+            .map((o: any) => `${o.treatment} — ${o.summary}-Price: ${o.startingPrice}- Price Range: ${o.priceRange[0]}–${o.priceRange[1]} `)
             .join(",");
           aiReply = `${result.message}\n${list}`;
         } else if (result?.treatment) {
@@ -176,6 +190,10 @@ export const generateChatCompletion = async (req: Request,
         } else if (result?.message) {
           aiReply = result.message;
         }
+      } else if (fc && fc.name === "scheduleAppointment ") {
+        const { patientName, doctorName, date, time, treatment } = fc.args || {}
+        const result = await (tools as any).scheduleAppointment({ patientName, doctorName, date, time, treatment })
+        aiReply = `${result?.message}`
       }
     }
     if (!aiReply) {
