@@ -190,7 +190,7 @@ export const generateChatCompletion = async (req: Request,
         } else if (result?.message) {
           aiReply = result.message;
         }
-      } else if (fc && fc.name === "scheduleAppointment ") {
+      } else if (fc && fc.name === "scheduleAppointment") {
         const { patientName, doctorName, date, time, treatment } = fc.args || {}
         const result = await (tools as any).scheduleAppointment({ patientName, doctorName, date, time, treatment })
         aiReply = `${result?.message}`
