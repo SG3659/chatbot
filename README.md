@@ -2,6 +2,8 @@
   ## Present work done by chatbot 
   Users should be able to come in and ask questions regarding the treatments that the clinic offers, ask for
   information regarding the doctors, or ask about any pre-op and post-op queries which they might have.  
+
+  patients should be able to book an appointment with any of the two doctors according to their availability.
 ## Clone Project:
     -> git clone https://github.com/SG3659/chatbot.git
 
