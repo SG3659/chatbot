@@ -5,18 +5,6 @@ const appointmentSchema = new mongoose.Schema({
     type: String,
     require: true,
   },
-  // patientAge: {
-  //   type: Number,
-  //   require: true,
-  // },
-  // patientPhone: {
-  //   type: String,
-  //   require: true,
-  // },
-  // doctorId: {
-  //   type: String,
-  //   require: true,
-  // },
   doctorName: {
     type: String,
     require: true,
@@ -32,6 +20,15 @@ const appointmentSchema = new mongoose.Schema({
   treatment: {
     type: String,
     require: true,
+  },
+  status: {
+    type: String,
+    enum: ["scheduled", "cancelled", "completed"],
+    default: "scheduled",
+  },
+  cancelledAt: {
+    type: Date,
+    default: null,
   }
-});
+}, { timestamps: true });
 export default mongoose.model("Appointment", appointmentSchema);

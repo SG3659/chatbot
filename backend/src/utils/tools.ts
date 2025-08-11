@@ -263,7 +263,7 @@ export const tools = {
       const newAppointment = await Appointment.create({
         patientName, doctorName, date, time, treatment
       })
-      newAppointment.save()
+      await newAppointment.save()
       return {
         newAppointment,
         message: `Appointment scheduled with Dr. ${doctorName} on ${date} at ${time} for ${treatment}.`
@@ -274,6 +274,57 @@ export const tools = {
       return {
         message: "Failed to schedule appointment. Please try again later."
       };
+    }
+  },
+  rescheduleAppointment: async ({ appointmentId, newDate, newTime }: {
+    appointmentId?: string;
+    newDate?: string;
+    newTime?: string;
+  }) => {
+    try {
+      if (!appointmentId || !newDate || !newTime) {
+        return { message: "Missing required details to reschedule the appointment." };
+      }
+      const updated = await Appointment.findByIdAndUpdate(
+        appointmentId,
+        { date: newDate, time: newTime },
+        { new: true }
+      );
+      if (!updated) {
+        return { message: "Appointment not found." };
+      }
+      return {
+        updatedAppointment: updated,
+        message: `Appointment rescheduled to ${newDate} at ${newTime}.`
+      };
+    } catch (error) {
+      console.error("Error rescheduling appointment:", error);
+      return { message: "Failed to reschedule appointment. Please try again later." };
+    }
+  },
+  cancelAppointment: async ({ appointmentId, reason }: {
+    appointmentId?: string;
+    reason?: string;
+  }) => {
+    try {
+      if (!appointmentId) {
+        return { message: "Appointment ID is required to cancel." };
+      }
+      const updated = await Appointment.findByIdAndUpdate(
+        appointmentId,
+        { status: "cancelled", cancelledAt: new Date() },
+        { new: true }
+      );
+      if (!updated) {
+        return { message: "Appointment not found." };
+      }
+      return {
+        cancelledAppointment: updated,
+        message: `Appointment has been cancelled${reason ? `: ${reason}` : "."}`
+      };
+    } catch (error) {
+      console.error("Error cancelling appointment:", error);
+      return { message: "Failed to cancel appointment. Please try again later." };
     }
   }
 

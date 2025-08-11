@@ -79,6 +79,29 @@ export const generateChatCompletion = async (req: Request,
           },
           required: ["patientName", "doctorName", "date", "time", "treatment"]
         }
+      }, {
+        name: "rescheduleAppointment",
+        description: "Reschedules an existing appointment to a new date/time.",
+        parameters: {
+          type: "object",
+          properties: {
+            appointmentId: { type: "string", description: "MongoDB _id of the appointment" },
+            newDate: { type: "string", description: "New date in YYYY-MM-DD" },
+            newTime: { type: "string", description: "New time in HH:mm" }
+          },
+          required: ["appointmentId", "newDate", "newTime"]
+        }
+      }, {
+        name: "cancelAppointment",
+        description: "Cancels an existing appointment.",
+        parameters: {
+          type: "object",
+          properties: {
+            appointmentId: { type: "string", description: "MongoDB _id of the appointment" },
+            reason: { type: "string", description: "Optional cancellation reason" }
+          },
+          required: ["appointmentId"]
+        }
       }
     ];
     // Get previous chats from DB
@@ -193,6 +216,14 @@ export const generateChatCompletion = async (req: Request,
       } else if (fc && fc.name === "scheduleAppointment") {
         const { patientName, doctorName, date, time, treatment } = fc.args || {}
         const result = await (tools as any).scheduleAppointment({ patientName, doctorName, date, time, treatment })
+        aiReply = `${result?.message}`
+      } else if (fc && fc.name === "rescheduleAppointment") {
+        const { appointmentId, newDate, newTime } = fc.args || {}
+        const result = await (tools as any).rescheduleAppointment({ appointmentId, newDate, newTime })
+        aiReply = `${result?.message}`
+      } else if (fc && fc.name === "cancelAppointment") {
+        const { appointmentId, reason } = fc.args || {}
+        const result = await (tools as any).cancelAppointment({ appointmentId, reason })
         aiReply = `${result?.message}`
       }
     }
