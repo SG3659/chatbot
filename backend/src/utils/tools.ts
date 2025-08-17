@@ -168,7 +168,19 @@ const treatments = {
 
 export type DoctorId = keyof typeof doctors | "both";
 export type ProcedureTipsID = keyof typeof procedureTips | "all"
-export type TreatmentID = keyof typeof procedureTips | "all"
+export type TreatmentID = keyof typeof treatments | "all"
+
+// Standalone helper to check if a slot is free for a doctor
+async function checkDoctorAvailability({ doctorName, date, time }: { doctorName?: string; date?: string; time?: string; }) {
+  if (!doctorName || !date || !time) {
+    return { available: false, message: "Missing doctorName, date, or time." };
+  }
+  const existing = await Appointment.findOne({ doctorName, date, time }).lean();
+  if (existing) {
+    return { available: false, message: `Slot not available. Dr. ${doctorName} already has an appointment on ${date} at ${time}.` };
+  }
+  return { available: true, message: "Slot is available." };
+}
 
 export const tools = {
   getDoctorInfo: async ({ doctorId }: { doctorId?: DoctorId }) => {
@@ -246,6 +258,7 @@ export const tools = {
     }
 
   },
+  checkDoctorAvailability,
   scheduleAppointment: async ({ patientName, doctorName, date, time, treatment }: {
     patientName?: string;
     doctorName?: string;
@@ -260,6 +273,12 @@ export const tools = {
         }
       }
 
+      // Pre-check availability for the doctor at the specified date and time
+      const availability = await checkDoctorAvailability({ doctorName, date, time });
+      if (!availability.available) {
+        return { message: availability.message };
+      }
+
       const newAppointment = await Appointment.create({
         patientName, doctorName, date, time, treatment
       })
@@ -269,8 +288,11 @@ export const tools = {
         message: `Appointment scheduled with Dr. ${doctorName} on ${date} at ${time} for ${treatment}.`
 
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error saving appointment:", error);
+      if (error?.code === 11000) {
+        return { message: "This slot has just been taken. Please choose a different time." };
+      }
       return {
         message: "Failed to schedule appointment. Please try again later."
       };

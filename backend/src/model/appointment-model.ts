@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const appointmentSchema = new mongoose.Schema({
   patientName: {
     type: String,
-    require: true,
+    required: true,
   },
   // patientAge: {
   //   type: Number,
@@ -19,19 +19,21 @@ const appointmentSchema = new mongoose.Schema({
   // },
   doctorName: {
     type: String,
-    require: true,
+    required: true,
   },
   date: {
     type: String,
-    require: true,
+    required: true,
   },
   time: {
     type: String,
-    require: true,
+    required: true,
   },
   treatment: {
     type: String,
-    require: true,
+    required: true,
   }
 });
+// Prevent double booking: one appointment per doctor per date+time
+appointmentSchema.index({ doctorName: 1, date: 1, time: 1 }, { unique: true });
 export default mongoose.model("Appointment", appointmentSchema);
