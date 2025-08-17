@@ -65,7 +65,21 @@ export const generateChatCompletion = async (req: Request,
           }
         }
 
-      }, {
+      },
+      {
+        name: "checkDoctorAvailability",
+        description: "Checks if a doctor's slot is available for a given date and time.",
+        parameters: {
+          type: "object",
+          properties: {
+            doctorName: { type: "string", description: "Name of the doctor" },
+            date: { type: "string", description: "Date in YYYY-MM-DD format" },
+            time: { type: "string", description: "Time in HH:mm format" }
+          },
+          required: ["doctorName", "date", "time"]
+        }
+      },
+      {
         name: "scheduleAppointment",
         description: "Schedules an appointment for a patient with a doctor.",
         parameters: {
@@ -176,8 +190,8 @@ export const generateChatCompletion = async (req: Request,
         }
       }
       else if (fc && fc.name === "getTreatmentClinicOffer") {
-        const treatment = fc.args?.treatment as string | undefined;
-        const result = await (tools as any).getTreatmentClinicOffer({ treatment });
+        const treatmentId = fc.args?.treatmentId as string | undefined;
+        const result = await (tools as any).getTreatmentClinicOffer({ treatmentId });
         if (result?.treatments && Array.isArray(result.treatments)) {
           const list = result.treatments
             .map((o: any) => `${o.treatment} — ${o.summary}-Price: ${o.startingPrice}- Price Range: ${o.priceRange[0]}–${o.priceRange[1]} `)
@@ -190,6 +204,10 @@ export const generateChatCompletion = async (req: Request,
         } else if (result?.message) {
           aiReply = result.message;
         }
+      } else if (fc && fc.name === "checkDoctorAvailability") {
+        const { doctorName, date, time } = fc.args || {};
+        const result = await (tools as any).checkDoctorAvailability({ doctorName, date, time });
+        aiReply = result?.message ?? "";
       } else if (fc && fc.name === "scheduleAppointment") {
         const { patientName, doctorName, date, time, treatment } = fc.args || {}
         const result = await (tools as any).scheduleAppointment({ patientName, doctorName, date, time, treatment })
