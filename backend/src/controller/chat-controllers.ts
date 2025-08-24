@@ -1,5 +1,6 @@
-import type { NextFunction, Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express"
 import Chats from "../model/chatModel.js"
+import User from "../model/user-model.js"
 import dotenv from "dotenv"
 dotenv.config()
 import { GoogleGenAI } from "@google/genai";
@@ -22,7 +23,7 @@ export const generateChatCompletion = async (req: Request,
       {
         name: "getDoctorInfo",
         description:
-          "Retrieve information about our surgeons. Pass doctorId as 'andre', 'catherine', or 'both' to list both.",
+          "Retrieve information about our surgeons. Pass doctorId as 'andre', 'catherine', or 'doctors' to list of all doctors.",
         parameters: {
           type: "object",
           properties: {
@@ -30,7 +31,18 @@ export const generateChatCompletion = async (req: Request,
               type: "string",
               description:
                 "ID of the doctor to retrieve. Use 'andre', 'catherine', or 'both' to get both.",
-              enum: ["andre", "catherine", "both"],
+              enum: ["andre",
+                "catherine",
+                "michael",
+                "sophia",
+                "rajesh",
+                "emily",
+                "david",
+                "isabella",
+                "ethan",
+                "akira",
+                "olivia",
+                "william", "all"],
             },
           },
         },
@@ -44,7 +56,7 @@ export const generateChatCompletion = async (req: Request,
             procedureId: {
               type: "string",
               description: "Provide the pre or post OP of surgery name Use Rhinoplasty Facelift Lip Fillers",
-              enum: ["rhinoplasty", "facelift", "tummytuck", "lipfillers", "all"],
+              enum: ["rhinoplasty", "facelift", "tummytuck", "lipfillers", "breastaugmentation", "liposuction", "eyelidsurgery", "butlift", "botox", "all"],
             }
 
           }
@@ -60,18 +72,31 @@ export const generateChatCompletion = async (req: Request,
             treatmentId: {
               type: "string",
               description: "Optional treatment name or 'all' to list all offers.",
-              enum: ["rhinoplasty", "facelift", "tummytuck", "lipfillers", "upperarmlift", "all"]
+              enum: [
+                "rhinoplasty",
+                "facelift",
+                "lipfillers",
+                "upperarmlift",
+                "tummytuck",
+                "breastaugmentation",
+                "liposuction",
+                "eyelidsurgery",
+                "butlift",
+                "botox",
+                "all",
+              ]
             }
           }
         }
 
-      }, {
+      },
+      {
         name: "scheduleAppointment",
         description: "Schedules an appointment for a patient with a doctor.",
         parameters: {
           type: "object",
           properties: {
-            patientName: { type: "string", description: "Name of the patient" },
+            patientName: { type: "string" },
             doctorName: { type: "string", description: "Name of the doctor" },
             date: { type: "string", description: "Date of appointment in YYYY-MM-DD format" },
             time: { type: "string", description: "Time of appointment in HH:mm format" },
@@ -79,7 +104,20 @@ export const generateChatCompletion = async (req: Request,
           },
           required: ["patientName", "doctorName", "date", "time", "treatment"]
         }
-      }
+      },
+      {
+        name: "checkDoctorAvailability",
+        description: "Checks if a doctor's slot is available for a given date and time.",
+        parameters: {
+          type: "object",
+          properties: {
+            doctorName: { type: "string", description: "Name of the doctor" },
+            date: { type: "string", description: "Date in YYYY-MM-DD format" },
+            time: { type: "string", description: "Time in HH:mm format" }
+          },
+          required: ["doctorName", "date", "time"]
+        }
+      },
     ];
     // Get previous chats from DB
     const previousChats = await Chats.find().lean();
@@ -176,8 +214,8 @@ export const generateChatCompletion = async (req: Request,
         }
       }
       else if (fc && fc.name === "getTreatmentClinicOffer") {
-        const treatment = fc.args?.treatment as string | undefined;
-        const result = await (tools as any).getTreatmentClinicOffer({ treatment });
+        const treatmentId = fc.args?.treatmentId as string | undefined;
+        const result = await (tools as any).getTreatmentClinicOffer({ treatmentId });
         if (result?.treatments && Array.isArray(result.treatments)) {
           const list = result.treatments
             .map((o: any) => `${o.treatment} — ${o.summary}-Price: ${o.startingPrice}- Price Range: ${o.priceRange[0]}–${o.priceRange[1]} `)
@@ -190,11 +228,28 @@ export const generateChatCompletion = async (req: Request,
         } else if (result?.message) {
           aiReply = result.message;
         }
-      } else if (fc && fc.name === "scheduleAppointment") {
-        const { patientName, doctorName, date, time, treatment } = fc.args || {}
+      }
+      else if (fc && fc.name === "checkDoctorAvailability") {
+        const { doctorName, date, time } = fc.args || {};
+        const result = await (tools as any).checkDoctorAvailability({ doctorName, date, time });
+        aiReply = result?.message ?? "";
+      }
+      else if (fc && fc.name === "scheduleAppointment") {
+
+
+        const { doctorName, date, time, treatment } = fc.args || {}
+        const email = req.body.email;
+        let patientName = "";
+        if (email) {
+          const user = await User.findOne({ email }).lean();
+          if (user && user.username) {
+            patientName = user.username;
+          }
+        }
         const result = await (tools as any).scheduleAppointment({ patientName, doctorName, date, time, treatment })
         aiReply = `${result?.message}`
       }
+
     }
     if (!aiReply) {
       const anyResponse: any = response as any;

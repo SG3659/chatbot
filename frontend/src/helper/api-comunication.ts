@@ -1,6 +1,9 @@
 import axiosconfig from "../services/axios-config"
+
 export const sendChatRequest = async (message: string) => {
-  const res = await axiosconfig.post("/chat/new", { message });
+  const email = localStorage.getItem("email");
+  console.log(email)
+  const res = await axiosconfig.post("/chat/new", { message, email });
   if (res.status !== 200) {
     throw new Error("Unable to send chat");
   }

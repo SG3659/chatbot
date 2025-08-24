@@ -30,13 +30,13 @@ const ChatItem = ({
       }}
     >
       <Avatar sx={{ ml: "0" }}>
-  <img
-    src="/bot.jpg"
-    alt="bot"
-    width={40}
-    height={40}
-    style={{ objectFit: "cover" }}
-  />      </Avatar>
+        <img
+          src="/bot.jpg"
+          alt="bot"
+          width={40}
+          height={40}
+          style={{ objectFit: "cover" }}
+        />      </Avatar>
       <Box>
         {!messageBlocks && (
           <Typography sx={{ fontSize: "20px" }}>{content}</Typography>
@@ -44,9 +44,9 @@ const ChatItem = ({
         {messageBlocks &&
           messageBlocks.length &&
           messageBlocks.map((block) =>
-           
-              <Typography sx={{ fontSize: "20px" }}>{block}</Typography>
-            
+
+            <Typography sx={{ fontSize: "20px" }}>{block}</Typography>
+
           )}
       </Box>
     </Box>
@@ -60,7 +60,7 @@ const ChatItem = ({
         borderRadius: 2,
       }}
     >
-      
+
       <Avatar sx={{ ml: "0", bgcolor: "black", color: "white" }}>
       </Avatar>
       <Box>
@@ -70,9 +70,9 @@ const ChatItem = ({
         {messageBlocks &&
           messageBlocks.length &&
           messageBlocks.map((block) =>
-         
-              <Typography sx={{ fontSize: "20px" }}>{block}</Typography>
-            
+
+            <Typography sx={{ fontSize: "20px" }}>{block}</Typography>
+
           )}
       </Box>
     </Box>
